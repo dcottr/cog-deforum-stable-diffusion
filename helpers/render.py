@@ -31,7 +31,7 @@ except ModuleNotFoundError:
 #import tifffile # Un-comment to save 32bpc TIFF images too. Also un-comment line within 'def save_8_16_or_32bpc_image()'
 
 # This function converts the image to 8bpc (if it isn't already) to display it on browser.
-def convert_image_to_8bpc(image, bit_depth_output): 
+def convert_image_to_8bpc(image, bit_depth_output):
     if bit_depth_output == 16:
         image = image / 256
         image = Image.fromarray(image.astype('uint8'))
@@ -41,8 +41,8 @@ def convert_image_to_8bpc(image, bit_depth_output):
     return image
 
 # This function saves the image to file, depending on bitrate. At 8bpc PIL saves png8 images. At 16bpc, numpngw saves png16 images. At 32 bpc, cv2 saves EXR images (and optionally tifffile saves 32bpc tiffs).
-def save_8_16_or_32bpc_image(image, outdir, filename, bit_depth_output): 
-    if bit_depth_output == 8: 
+def save_8_16_or_32bpc_image(image, outdir, filename, bit_depth_output):
+    if bit_depth_output == 8:
         image.save(os.path.join(outdir, filename))
     elif bit_depth_output == 32:
         #tifffile.imsave(os.path.join(outdir, filename).replace(".png", ".tiff"), image) # Un-comment to save 32bpc TIFF images too. Also un-comment 'import tifffile'
@@ -78,20 +78,14 @@ def next_seed(args):
 def render_image_batch(args, prompts, root):
     args.prompts = {k: f"{v:05d}" for v, k in enumerate(prompts)}
     args.using_vid_init = False
-    
+
     # create output folder for the batch
     os.makedirs(args.outdir, exist_ok=True)
     if args.save_settings or args.save_samples:
         print(f"Saving to {os.path.join(args.outdir, args.timestring)}_*")
 
-    # save settings for the batch
-    if args.save_settings:
-        filename = os.path.join(args.outdir, f"{args.timestring}_settings.txt")
-        with open(filename, "w+", encoding="utf-8") as f:
-            json.dump(dict(args.__dict__), f, ensure_ascii=False, indent=4)
-
     index = 0
-    
+
     # function for init image batching
     init_array = []
     if args.use_init:
@@ -101,7 +95,7 @@ def render_image_batch(args, prompts, root):
             init_array.append(args.init_image)
         elif not os.path.isfile(args.init_image):
             if args.init_image[-1] != "/": # avoids path error by adding / to end if not there
-                args.init_image += "/" 
+                args.init_image += "/"
             for image in sorted(os.listdir(args.init_image)): # iterates dir and appends images to init_array
                 if image.split(".")[-1] in ("png", "jpg", "jpeg"):
                     init_array.append(args.init_image + image)
@@ -113,7 +107,7 @@ def render_image_batch(args, prompts, root):
     # when doing large batches don't flood browser with images
     clear_between_batches = args.n_batch >= 32
 
-    for iprompt, prompt in enumerate(prompts):  
+    for iprompt, prompt in enumerate(prompts):
         args.prompt = prompt
         args.clip_prompt = prompt
         print(f"Prompt {iprompt+1} of {len(prompts)}")
@@ -122,10 +116,10 @@ def render_image_batch(args, prompts, root):
         all_images = []
 
         for batch_index in range(args.n_batch):
-            if clear_between_batches and batch_index % 32 == 0: 
-                display.clear_output(wait=True)            
+            if clear_between_batches and batch_index % 32 == 0:
+                display.clear_output(wait=True)
             print(f"Batch {batch_index+1} of {args.n_batch}")
-            
+
             for image in init_array: # iterates the init images
                 args.init_image = image
                 results = generate(args, root)
@@ -152,7 +146,7 @@ def render_image_batch(args, prompts, root):
             filename = f"{args.timestring}_{iprompt:05d}_grid_{args.seed}.png"
             grid_image = Image.fromarray(grid.astype(np.uint8))
             grid_image.save(os.path.join(args.outdir, filename))
-            display.clear_output(wait=True)            
+            display.clear_output(wait=True)
             display.display(grid_image)
 
 def unsharp_mask(img, kernel_size=(5, 5), sigma=1.0, amount=1.0, threshold=0):
@@ -196,12 +190,6 @@ def render_animation(args, anim_args, animation_prompts, root):
     os.makedirs(args.outdir, exist_ok=True)
     print(f"Saving animation frames to {args.outdir}")
 
-    # save settings for the batch
-    settings_filename = os.path.join(args.outdir, f"{args.timestring}_settings.txt")
-    with open(settings_filename, "w+", encoding="utf-8") as f:
-        s = {**dict(args.__dict__), **dict(anim_args.__dict__)}
-        json.dump(s, f, ensure_ascii=False, indent=4)
-        
     # resume from timestring
     if anim_args.resume_from_timestring:
         args.timestring = anim_args.resume_timestring
@@ -273,7 +261,7 @@ def render_animation(args, anim_args, animation_prompts, root):
             "mask_auto_contrast_cutoff_high": int(keys.hybrid_video_comp_mask_auto_contrast_cutoff_high_schedule_series[frame_idx]),
         }
         depth = None
-        
+
         # emit in-between frames
         if turbo_steps > 1:
             tween_frame_start_idx = max(0, frame_idx-turbo_steps)
@@ -344,7 +332,7 @@ def render_animation(args, anim_args, animation_prompts, root):
             if frame_idx > 0:
                 if anim_args.hybrid_video_motion in ['Affine', 'Perspective']:
                     matrix = get_matrix_for_hybrid_motion(frame_idx-1, (args.W, args.H), inputfiles, anim_args.hybrid_video_motion)
-                    prev_img = image_transform_ransac(prev_img, matrix, anim_args.hybrid_video_motion, cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE)    
+                    prev_img = image_transform_ransac(prev_img, matrix, anim_args.hybrid_video_motion, cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE)
                 if anim_args.hybrid_video_motion in ['Optical Flow']:
                     flow = get_flow_for_hybrid_motion(frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, anim_args.hybrid_video_flow_method, anim_args.hybrid_video_comp_save_extra_frames)
                     prev_img = image_transform_optical_flow(prev_img, flow, cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE)
@@ -370,7 +358,7 @@ def render_animation(args, anim_args, animation_prompts, root):
                 # Transform the mask
                 mask_sample, _ = anim_frame_warp(args.mask_sample, args, anim_args, keys, frame_idx, depth_model, depth, device=root.device)
                 args.mask_sample = sample_from_cv2(mask_sample).half().to(root.device)
-            
+
             # apply color matching
             if anim_args.color_coherence != 'None':
                 # video color matching
@@ -410,7 +398,7 @@ def render_animation(args, anim_args, animation_prompts, root):
 
         # grab init image for current frame
         if using_vid_init:
-            init_frame = os.path.join(args.outdir, 'inputframes', f"{frame_idx+1:05}.jpg")            
+            init_frame = os.path.join(args.outdir, 'inputframes', f"{frame_idx+1:05}.jpg")
             print(f"Using video init frame {init_frame}")
             args.init_image = init_frame
             if anim_args.use_mask_video:
@@ -430,7 +418,7 @@ def render_animation(args, anim_args, animation_prompts, root):
             turbo_prev_image, turbo_prev_frame_idx = turbo_next_image, turbo_next_frame_idx
             turbo_next_image, turbo_next_frame_idx = sample_to_cv2(sample, type=np.float32), frame_idx
             frame_idx += turbo_steps
-        else:    
+        else:
             filename = f"{args.timestring}_{frame_idx:05}.png"
             # Save image to 8bpc or 16bpc
             save_8_16_or_32bpc_image(image, args.outdir, filename, args.bit_depth_output)
@@ -440,8 +428,8 @@ def render_animation(args, anim_args, animation_prompts, root):
             frame_idx += 1
 
         # Convert image to 8bpc to display
-        if args.bit_depth_output != 8: 
-            image = convert_image_to_8bpc(image, args.bit_depth_output) 
+        if args.bit_depth_output != 8:
+            image = convert_image_to_8bpc(image, args.bit_depth_output)
 
         display.clear_output(wait=True)
         display.display(image)
@@ -450,9 +438,9 @@ def render_animation(args, anim_args, animation_prompts, root):
 
 def render_input_video(args, anim_args, animation_prompts, root):
     # create a folder for the video input frames to live in
-    video_in_frame_path = os.path.join(args.outdir, 'inputframes') 
+    video_in_frame_path = os.path.join(args.outdir, 'inputframes')
     os.makedirs(video_in_frame_path, exist_ok=True)
-    
+
     # save the video frames from input video
     print(f"Exporting Video Frames (1 every {anim_args.extract_nth_frame}) frames to {video_in_frame_path}...")
     vid2frames(anim_args.video_init_path, video_in_frame_path, anim_args.extract_nth_frame, anim_args.overwrite_extracted_frames)
@@ -464,7 +452,7 @@ def render_input_video(args, anim_args, animation_prompts, root):
 
     if anim_args.use_mask_video:
         # create a folder for the mask video input frames to live in
-        mask_in_frame_path = os.path.join(args.outdir, 'maskframes') 
+        mask_in_frame_path = os.path.join(args.outdir, 'maskframes')
         os.makedirs(mask_in_frame_path, exist_ok=True)
 
         # save the video frames from mask video
@@ -483,12 +471,6 @@ def render_interpolation(args, anim_args, animation_prompts, root):
     os.makedirs(args.outdir, exist_ok=True)
     print(f"Saving animation frames to {args.outdir}")
 
-    # save settings for the batch
-    settings_filename = os.path.join(args.outdir, f"{args.timestring}_settings.txt")
-    with open(settings_filename, "w+", encoding="utf-8") as f:
-        s = {**dict(args.__dict__), **dict(anim_args.__dict__)}
-        json.dump(s, f, ensure_ascii=False, indent=4)
-    
     # Interpolation Settings
     args.n_samples = 1
     args.seed_behavior = 'fixed' # force fix seed at the moment bc only 1 seed is available
@@ -503,15 +485,15 @@ def render_interpolation(args, anim_args, animation_prompts, root):
         # sample the diffusion model
         results = generate(args, root, return_c=True)
         c, image = results[0], results[1]
-        prompts_c_s.append(c) 
-      
+        prompts_c_s.append(c)
+
         # Convert image to 8bpc to display
-        if args.bit_depth_output != 8: 
-            image = convert_image_to_8bpc(image, args.bit_depth_output) 
-      
+        if args.bit_depth_output != 8:
+            image = convert_image_to_8bpc(image, args.bit_depth_output)
+
         # display.clear_output(wait=True)
         display.display(image)
-      
+
         args.seed = next_seed(args)
 
     display.clear_output(wait=True)
@@ -529,7 +511,7 @@ def render_interpolation(args, anim_args, animation_prompts, root):
             for j in range(dist_frames):
                 # interpolate the text embedding
                 prompt1_c = prompts_c_s[i]
-                prompt2_c = prompts_c_s[i+1]  
+                prompt2_c = prompts_c_s[i+1]
                 args.init_c = prompt1_c.add(prompt2_c.sub(prompt1_c).mul(j * 1/dist_frames))
 
                 # sample the diffusion model
@@ -542,8 +524,8 @@ def render_interpolation(args, anim_args, animation_prompts, root):
                 frame_idx += 1
 
                 # Convert image to 8bpc to display
-                if args.bit_depth_output != 8: 
-                    image = convert_image_to_8bpc(image, args.bit_depth_output) 
+                if args.bit_depth_output != 8:
+                    image = convert_image_to_8bpc(image, args.bit_depth_output)
 
                 display.clear_output(wait=True)
                 display.display(image)
@@ -555,7 +537,7 @@ def render_interpolation(args, anim_args, animation_prompts, root):
             for j in range(anim_args.interpolate_x_frames+1):
                 # interpolate the text embedding
                 prompt1_c = prompts_c_s[i]
-                prompt2_c = prompts_c_s[i+1]  
+                prompt2_c = prompts_c_s[i+1]
                 args.init_c = prompt1_c.add(prompt2_c.sub(prompt1_c).mul(j * 1/(anim_args.interpolate_x_frames+1)))
 
                 # sample the diffusion model
@@ -567,8 +549,8 @@ def render_interpolation(args, anim_args, animation_prompts, root):
                 frame_idx += 1
 
                 # Convert image to 8bpc to display
-                if args.bit_depth_output != 8: 
-                    image = convert_image_to_8bpc(image, args.bit_depth_output) 
+                if args.bit_depth_output != 8:
+                    image = convert_image_to_8bpc(image, args.bit_depth_output)
 
                 display.clear_output(wait=True)
                 display.display(image)
@@ -583,8 +565,8 @@ def render_interpolation(args, anim_args, animation_prompts, root):
     save_8_16_or_32bpc_image(image, args.outdir, filename, args.bit_depth_output)
 
     # Convert image to 8bpc to display
-    if args.bit_depth_output != 8: 
-        image = convert_image_to_8bpc(image, args.bit_depth_output) 
+    if args.bit_depth_output != 8:
+        image = convert_image_to_8bpc(image, args.bit_depth_output)
 
     display.clear_output(wait=True)
     display.display(image)
@@ -642,7 +624,7 @@ def render_animation_hybrid_composite(args, anim_args, frame_idx, prev_img, dept
     mask_frame = os.path.join(args.outdir, 'hybridframes', f"mask{frame_idx:05}.jpg")
     comp_frame = os.path.join(args.outdir, 'hybridframes', f"comp{frame_idx:05}.jpg")
     prev_frame = os.path.join(args.outdir, 'hybridframes', f"prev{frame_idx:05}.jpg")
-    prev_img_hybrid = Image.fromarray(prev_img)       
+    prev_img_hybrid = Image.fromarray(prev_img)
     video_image = Image.open(video_frame)
     video_image = video_image.resize((args.W, args.H), Image.Resampling.LANCZOS)
     hybrid_mask = None
@@ -658,7 +640,7 @@ def render_animation_hybrid_composite(args, anim_args, frame_idx, prev_img, dept
         hybrid_mask = Image.blend(ImageOps.grayscale(prev_img_hybrid), ImageOps.grayscale(video_image), hybrid_video_comp_schedules['mask_blend_alpha'])
     elif anim_args.hybrid_video_comp_mask_type == 'Difference': # create difference mask image
         hybrid_mask = ImageChops.difference(ImageOps.grayscale(prev_img_hybrid), ImageOps.grayscale(video_image))
-        
+
     # optionally invert mask, if mask type is defined
     if anim_args.hybrid_video_comp_mask_inverse and anim_args.hybrid_video_comp_mask_type != "None":
         hybrid_mask = ImageOps.invert(hybrid_mask)
@@ -671,26 +653,26 @@ def render_animation_hybrid_composite(args, anim_args, frame_idx, prev_img, dept
         hybrid_mask = ImageOps.grayscale(hybrid_mask)
         # equalization before
         if anim_args.hybrid_video_comp_mask_equalize in ['Before', 'Both']:
-            hybrid_mask = ImageOps.equalize(hybrid_mask)        
+            hybrid_mask = ImageOps.equalize(hybrid_mask)
         # contrast
         hybrid_mask = ImageEnhance.Contrast(hybrid_mask).enhance(hybrid_video_comp_schedules['mask_contrast'])
         # auto contrast with cutoffs lo/hi
         if anim_args.hybrid_video_comp_mask_auto_contrast:
             hybrid_mask = autocontrast_grayscale(np.array(hybrid_mask), hybrid_video_comp_schedules['mask_auto_contrast_cutoff_low'], hybrid_video_comp_schedules['mask_auto_contrast_cutoff_high'])
             hybrid_mask = Image.fromarray(hybrid_mask)
-            hybrid_mask = ImageOps.grayscale(hybrid_mask)   
+            hybrid_mask = ImageOps.grayscale(hybrid_mask)
         if anim_args.hybrid_video_comp_save_extra_frames:
             hybrid_mask.save(mask_frame)
         # equalization after
         if anim_args.hybrid_video_comp_mask_equalize in ['After', 'Both']:
-            hybrid_mask = ImageOps.equalize(hybrid_mask)        
+            hybrid_mask = ImageOps.equalize(hybrid_mask)
         # do compositing and save
-        hybrid_comp = Image.composite(prev_img_hybrid, video_image, hybrid_mask)            
+        hybrid_comp = Image.composite(prev_img_hybrid, video_image, hybrid_mask)
         if anim_args.hybrid_video_comp_save_extra_frames:
             hybrid_comp.save(comp_frame)
 
     # final blend of composite with prev_img, or just a blend if no composite is selected
-    hybrid_blend = Image.blend(prev_img_hybrid, hybrid_comp, hybrid_video_comp_schedules['alpha'])  
+    hybrid_blend = Image.blend(prev_img_hybrid, hybrid_comp, hybrid_video_comp_schedules['alpha'])
     if anim_args.hybrid_video_comp_save_extra_frames:
         hybrid_blend.save(prev_frame)
     prev_img = hybrid_blend
@@ -710,7 +692,7 @@ def get_translation_matrix_from_images(i1, i2, dimensions, hybrid_video_motion, 
     img2 = cv2.imread(i2, 0)
     img1 = cv2.resize(img1, (dimensions[0], dimensions[1]), cv2.INTER_AREA)
     img2 = cv2.resize(img2, (dimensions[0], dimensions[1]), cv2.INTER_AREA)
-    
+
     # Detect feature points in previous frame
     prev_pts = cv2.goodFeaturesToTrack(img1,
                                         maxCorners=max_corners,
@@ -722,8 +704,8 @@ def get_translation_matrix_from_images(i1, i2, dimensions, hybrid_video_motion, 
         return get_hybrid_video_motion_default_matrix(hybrid_video_motion)
 
     # Get optical flow
-    curr_pts, status, err = cv2.calcOpticalFlowPyrLK(img1, img2, prev_pts, None) 
-   
+    curr_pts, status, err = cv2.calcOpticalFlowPyrLK(img1, img2, prev_pts, None)
+
     # Filter only valid points
     idx = np.where(status==1)[0]
     prev_pts = prev_pts[idx]
@@ -731,7 +713,7 @@ def get_translation_matrix_from_images(i1, i2, dimensions, hybrid_video_motion, 
 
     if len(prev_pts) < 8 or len(curr_pts) < 8:
         return get_hybrid_video_motion_default_matrix(hybrid_video_motion)
-    
+
     if hybrid_video_motion == "Perspective":  # Perspective - Find the transformation between points
         transformation_matrix, mask = cv2.findHomography(prev_pts, curr_pts, cv2.RANSAC, 5.0)
         return transformation_matrix
@@ -751,11 +733,11 @@ def get_flow_from_images(img1, img2, dimensions, method):
     elif method =="Farneback":
         r = get_flow_from_images_Farneback(i1, i2)
     return r
-        
+
 def get_flow_from_images_Farneback(img1, img2, last_flow=None, pyr_scale = 0.5, levels = 3, winsize = 15, iterations = 3, poly_n = 5, poly_sigma = 1.2):
     i1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
     i2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
-    flags = 0 # flags = cv2.OPTFLOW_USE_INITIAL_FLOW    
+    flags = 0 # flags = cv2.OPTFLOW_USE_INITIAL_FLOW
     flow = cv2.calcOpticalFlowFarneback(i1, i2, last_flow, pyr_scale, levels, winsize, iterations, poly_n, poly_sigma, flags)
     return flow
 
@@ -850,7 +832,7 @@ def draw_flow_lines_in_grid_in_color(img, flow, step=8, magnitude_multiplier=1, 
             g = int(bgr[y1, x1, 1])
             r = int(bgr[y1, x1, 2])
             color = (b, g, r)
-            cv2.arrowedLine(vis, (x1, y1), (x2, y2), color, thickness=1, tipLength=0.2)    
+            cv2.arrowedLine(vis, (x1, y1), (x2, y2), color, thickness=1, tipLength=0.2)
 
     return vis
 

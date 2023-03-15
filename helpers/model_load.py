@@ -30,7 +30,7 @@ def make_linear_decode(model_version, device='cuda:0'):
 
 
 def download_model(model_map,root):
-    
+
     url = model_map[root.model_checkpoint]['url']
 
     # CLI dialogue to authenticate download
@@ -123,16 +123,6 @@ def load_model(root, load_on_run_all=True, check_sha256=True, map_location="cuda
             'url': 'https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned-emaonly.ckpt',
             'requires_login': False,
             },
-        "sd-v1-4-full-ema.ckpt": {
-            'sha256': '14749efc0ae8ef0329391ad4436feb781b402f4fece4883c7ad8d10556d8a36a',
-            'url': 'https://huggingface.co/CompVis/stable-diffusion-v-1-2-original/blob/main/sd-v1-4-full-ema.ckpt',
-            'requires_login': True,
-            },
-        "sd-v1-4.ckpt": {
-            'sha256': 'fe4efff1e174c627256e44ec2991ba279b3816e364b49f9be2abc0b3ff3f8556',
-            'url': 'https://huggingface.co/CompVis/stable-diffusion-v-1-4-original/resolve/main/sd-v1-4.ckpt',
-            'requires_login': True,
-            },
         "sd-v1-3-full-ema.ckpt": {
             'sha256': '54632c6e8a36eecae65e36cb0595fab314e1a1545a65209f24fde221a8d4b2ca',
             'url': 'https://huggingface.co/CompVis/stable-diffusion-v-1-3-original/blob/main/sd-v1-3-full-ema.ckpt',
@@ -185,7 +175,7 @@ def load_model(root, load_on_run_all=True, check_sha256=True, map_location="cuda
         #print(f"Warning: {ckpt_config_path} does not exist.")
         ckpt_config_path = os.path.join(path_extend,"configs",root.model_config)
         #print(f"Using {ckpt_config_path} instead.")
-        
+
     ckpt_config_path = os.path.abspath(ckpt_config_path)
 
     # checkpoint path or download
@@ -199,7 +189,7 @@ def load_model(root, load_on_run_all=True, check_sha256=True, map_location="cuda
     else:
         print(f"Please download model checkpoint and place in {os.path.join(root.models_path, root.model_checkpoint)}")
         ckpt_valid = False
-        
+
     print(f"config_path: {ckpt_config_path}")
     print(f"ckpt_path: {ckpt_path}")
 
@@ -208,7 +198,7 @@ def load_model(root, load_on_run_all=True, check_sha256=True, map_location="cuda
             import hashlib
             print("..checking sha256")
             with open(ckpt_path, "rb") as f:
-                bytes = f.read() 
+                bytes = f.read()
                 hash = hashlib.sha256(bytes).hexdigest()
                 del bytes
             if model_map[root.model_checkpoint]["sha256"] == hash:
@@ -266,7 +256,7 @@ def get_model_output_paths(root):
     output_path = root.output_path
 
     #@markdown **Google Drive Path Variables (Optional)**
-    
+
     force_remount = False
 
     try:

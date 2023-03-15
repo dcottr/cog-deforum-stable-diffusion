@@ -48,7 +48,7 @@ def setup_environment():
 
         # weird hack
         import torch
-        
+
         all_process = [
             ['pip', 'install', 'omegaconf', 'einops==0.4.1', 'pytorch-lightning==1.7.7', 'torchmetrics', 'transformers', 'safetensors', 'kornia'],
             ['git', 'clone', 'https://github.com/deforum-art/deforum-stable-diffusion'],
@@ -112,7 +112,7 @@ def Root():
     #@markdown **Model Setup**
     map_location = "cuda" #@param ["cpu", "cuda"]
     model_config = "v1-inference.yaml" #@param ["custom","v2-inference.yaml","v2-inference-v.yaml","v1-inference.yaml"]
-    model_checkpoint =  "Protogen_V2.2.ckpt" #@param ["custom","v2-1_768-ema-pruned.ckpt","v2-1_512-ema-pruned.ckpt","768-v-ema.ckpt","512-base-ema.ckpt","Protogen_V2.2.ckpt","v1-5-pruned.ckpt","v1-5-pruned-emaonly.ckpt","sd-v1-4-full-ema.ckpt","sd-v1-4.ckpt","sd-v1-3-full-ema.ckpt","sd-v1-3.ckpt","sd-v1-2-full-ema.ckpt","sd-v1-2.ckpt","sd-v1-1-full-ema.ckpt","sd-v1-1.ckpt", "robo-diffusion-v1.ckpt","wd-v1-3-float16.ckpt"]
+    model_checkpoint =  "Protogen_V2.2.ckpt" #@param ["custom","v2-1_768-ema-pruned.ckpt","v2-1_512-ema-pruned.ckpt","768-v-ema.ckpt","512-base-ema.ckpt","Protogen_V2.2.ckpt","v1-5-pruned.ckpt","v1-5-pruned-emaonly.ckpt","sd-v1-3-full-ema.ckpt","sd-v1-3.ckpt","sd-v1-2-full-ema.ckpt","sd-v1-2.ckpt","sd-v1-1-full-ema.ckpt","sd-v1-1.ckpt", "robo-diffusion-v1.ckpt","wd-v1-3-float16.ckpt"]
     custom_config_path = "" #@param {type:"string"}
     custom_checkpoint_path = "" #@param {type:"string"}
     return locals()
@@ -210,7 +210,7 @@ def DeforumAnimArgs():
     #@markdown ####**Interpolation:**
     interpolate_key_frames = False #@param {type:"boolean"}
     interpolate_x_frames = 4 #@param {type:"number"}
-    
+
     #@markdown ####**Resume Animation:**
     resume_from_timestring = False #@param {type:"boolean"}
     resume_timestring = "20220829210106" #@param {type:"string"}
@@ -261,7 +261,7 @@ def DeforumArgs():
     scale = 7 #@param
     ddim_eta = 0.0 #@param
     dynamic_threshold = None
-    static_threshold = None   
+    static_threshold = None
 
     #@markdown **Save & Display Settings**
     save_samples = True #@param {type:"boolean"}
@@ -282,7 +282,7 @@ def DeforumArgs():
     seed_behavior = "iter" #@param ["iter","fixed","random","ladder","alternate"]
     seed_iter_N = 1 #@param {type:'integer'}
     make_grid = False #@param {type:"boolean"}
-    grid_rows = 2 #@param 
+    grid_rows = 2 #@param
     outdir = get_output_folder(root.output_path, batch_name)
 
     #@markdown **Init Settings**
@@ -327,7 +327,7 @@ def DeforumArgs():
     init_mse_image = "https://cdn.pixabay.com/photo/2022/07/30/13/10/green-longhorn-beetle-7353749_1280.jpg" #@param {type:"string"}
 
     blue_scale = 0 #@param {type:"number"}
-    
+
     #@markdown **Conditional Gradient Settings**
     gradient_wrt = 'x0_pred' #@param ["x", "x0_pred"]
     gradient_add_to = 'both' #@param ["cond", "uncond", "both"]
@@ -342,7 +342,7 @@ def DeforumArgs():
     cond_uncond_sync = True #@param {type:"boolean"}
 
     n_samples = 1 # doesnt do anything
-    precision = 'autocast' 
+    precision = 'autocast'
     C = 4
     f = 8
 
@@ -480,7 +480,7 @@ else:
     mp4 = open(mp4_path,'rb').read()
     data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
     display.display(display.HTML(f'<video controls loop><source src="{data_url}" type="video/mp4"></video>') )
-    
+
     if make_gif:
          gif_path = os.path.splitext(mp4_path)[0]+'.gif'
          cmd_gif = [

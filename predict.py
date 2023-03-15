@@ -57,7 +57,6 @@ class Predictor(BasePredictor):
                 "Protogen_V2.2.ckpt",
                 "v1-5-pruned.ckpt",
                 "v1-5-pruned-emaonly.ckpt",
-                "sd-v1-4.ckpt",
                 "robo-diffusion-v1.ckpt",
                 "wd-v1-3-float16.ckpt",
             ],
